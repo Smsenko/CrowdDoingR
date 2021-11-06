@@ -1,0 +1,83 @@
+# This R file creates two visualizations with Wordcloud using data from the 
+# CrowdDoing Medicinal Foods Amazon Reviews "allreviews.csv" file, 
+# with "Lemon Balm" as the words of interest in the search.
+
+# The initial csv file is loaded into R.
+RawReviews <- read.csv(file = 'C:\\Users\\Brains\\Documents\\R\\allreviews.csv')
+
+
+# relevant packages are installed and loaded into R.
+install.packages("data.table")					 
+library("data.table")                                
+install.packages("tm")
+library(tm)
+install.packages("wordcloud")
+library(wordcloud)
+install.packages("corpus")
+library(corpus)
+install.packages("stringr") # Not part of this example
+library(stringr)
+
+
+ImportantData <- RawReviews[ , c(1, 3, 6, 12, 18)] # select relevant columns
+ID2 <- ImportantData[ImportantData$ProductName %like% "Lemon Balm", ] # loads ONLY reviews of products with the phrase "Lemon Balm"
+write.csv(ID2, file = 'C:/Users/Brains/Documents/R/LemonBalmProductsX.csv')
+
+File_data <- system.file("C:\\Users\\Brains\\Documents\\R", package = "readtext")  # navigate to the appropriate folder.
+data_LB <- read.csv(paste0(File_data, "C:/Users/Brains/Documents/R/LemonBalmProductsX.csv"))
+names(data_LB) # gathers column names
+
+corpus_raw_review <- VCorpus(VectorSource(data_LB))
+corpus_raw_review <- tm_map(corpus_raw_review, removeWords, c(stopwords("english"))) # stopwords are common words with little/no meaning
+
+write.table(data_LB, file = 'C:/Users/Brains/Documents/R/LemonBalmProductsX.txt', append = FALSE, sep = " ", dec = ".", row.names = TRUE, col.names = TRUE) # turns data into a text file.
+
+ sourceTXT <- VectorSource(data_LB)
+ corpTXT <- VCorpus(sourceTXT)
+ 
+##
+#
+# ***These lines are unused lines initially used for experimentation***
+#
+# corpTXT2 <- tm_map(corpTXT, removeWords, c(stopwords("english")))
+# LBTXT <- TermDocumentMatrix(corpTXT, control = list(removePunctuation = TRUE,
+#                                         stopwords = TRUE))
+#
+# LBTXT2 = as.matrix(LBTXT)
+#
+# LBTXT2
+#
+# ***End of unused lines***
+#
+##
+
+LBTXT3 <- TermDocumentMatrix(corpTXT, list(tolower = T, # covert to lower case
+ stopwords = T, # remove 'a', 'an', etc.
+ removePunctuation = T,
+ wordLengths = c(3, Inf)) # keep words of length 3 or more
+                              )       
+							  
+LBTXT4 <- as.matrix(LBTXT3)
+
+LBTXT4
+
+	textFreqs <- rowSums(LBTXT4)
+	freqTab <- data.frame(term = names(textFreqs), num = textFreqs)
+	wordcloud(freqTab$term, freqTab$num, max.words = 100, color = "green")
+
+# Now for a second attempt with only words of 4 letters or more, and removing a standard dictionary
+
+LBTXT5 <- tm_map(corpTXT, removeWords, c(stopwords("english"), "will", "also", "bulk", "taste", "pack")) # eliminate standard dictionary and some unimportant words from the analysis
+
+LBTXT6 <- TermDocumentMatrix(LBTXT5, list(tolower = T, # covert to lower case
+ stopwords = T, # remove 'a', 'an', etc.
+ removePunctuation = T,
+ wordLengths = c(4, Inf)) # keep words of length 4 or more
+ 
+LBTXT7 <- as.matrix(LBTXT6)
+
+LBTXT7
+
+textFreqs2 <- rowSums(LBTXT7)
+freqTab2 <- data.frame(term = names(textFreqs2), num = textFreqs2)
+wordcloud(freqTab2$term, freqTab2$num, max.words = 100, color = "blue")
