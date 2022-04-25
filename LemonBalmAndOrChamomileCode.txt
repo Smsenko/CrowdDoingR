@@ -1,0 +1,18 @@
+# The initial csv file is loaded into R.
+RawReviews <- read.csv(file = 'C:\\Users\\Brains\\Documents\\R\\allreviews.csv')
+
+# relevant packages are installed and loaded into R.
+install.packages("data.table")					 
+library(data.table)                                
+install.packages("tm")
+library(tm)
+# install.packages("wordcloud")
+# library(wordcloud)
+# install.packages("corpus")
+# library(corpus)
+
+ImportantData <- RawReviews[ , c(1, 3, 6, 12, 18)] # select relevant columns
+ID2 <- ImportantData[ImportantData$ProductName %like% "Lemon Balm" | ImportantData$ProductName %like% "Chamomile",] # Select products with the words "Lemon Balm" OR "Chamomile" in them.
+ID3 <- ImportantData[ImportantData$ProductName %like% "Lemon Balm" & ImportantData$ProductName %like% "Chamomile",] # Select products with the words "Lemon Balm" AND "Chamomile" in them.
+LemonOrC <- write.csv(ID2, file = 'C:/Users/Brains/Documents/R/ProductsWithEitherChamomileOrLemonBalm.csv')
+LemonAndC <- write.csv(ID3, file = 'C:/Users/Brains/Documents/R/ProductsWithBothChamomileAndLemonBalm.csv')
